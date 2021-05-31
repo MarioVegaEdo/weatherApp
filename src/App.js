@@ -1,7 +1,6 @@
 import './App.css';
 import React,{useEffect, useState} from 'react'
 import {getWeather} from './ApiCalls/getWeather.js'
-import SearchData from './Components/SearchData.js'
 import Highlights from './Components/Highlights.js'
 import WeekPrediction from './Components/WeekPrediction.js'
 
@@ -9,31 +8,64 @@ const App = ()=> {
   
   const [weatherInfo, setWeatherInfo] = useState({});
   const [loading, setLoading] = useState(false);
+  const [searchLocation, setSearchLocation] = useState('Madrid')
+  const [newSearch, setNewSearch] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
-    setLoading(true)
-    getWeather().then((weatherInfo) =>
-     { setWeatherInfo(weatherInfo);
+    getWeather(searchLocation).then((weatherInfo) =>
+     { 
+      setWeatherInfo(weatherInfo);
       setLoading(false);
+      setNewSearch(false)
+      setSearchLocation("")
     }
      
     );
-  },[])
+  },[newSearch]);
 
-  
+  const handleSubmit = (event) =>{
+    event.preventDefault()
+    console.log(searchLocation)
+    setNewSearch(true)
+    setShowForm(false)   
+  }
+
+  const handleChange = (event) =>{
+    event.preventDefault()
+    setSearchLocation(event.target.value)
+    console.log(searchLocation)
+  }
+
+  const handleClick = () => {
+    setShowForm(true)
+  }
+
   return (
     <div>
         {loading ? 'Charing...' :''}
         {weatherInfo.city &&(
-          <div>
-            <SearchData 
-              temp={weatherInfo.list[0].main.temp}
-              weatherMain={weatherInfo.list[8].weather[0].main}
-              dt={weatherInfo.list[0].dt_txt}
-              city={weatherInfo.city.name}
-              country={weatherInfo.city.country}
-            />  
-            <div>
+          <div className="row p-5 text-center justify-content-start bg-secondary text-secondary text-white">
+            <div className="col-4">
+            {showForm
+             ?
+              <form className="  form-search" onSubmit={handleSubmit}>
+                <input className="input-medium search-query" onChange={handleChange} type="text" value={searchLocation} />
+                <button className="btn btn-primary">Search</button>
+              </form>
+             :
+             <div >
+                <button className="btn btn-primary" onClick={handleClick}>Search for places</button>
+                <div >
+                  <p>{weatherInfo.list[0].main.temp}</p>
+                  <img src="/images/index.jpg" alt={weatherInfo.list[8].weather[0].main} />
+                  <p>{weatherInfo.list[0].dt_txt}</p>
+                  <p>{weatherInfo.city.name}({weatherInfo.city.country})</p>
+                </div>
+              </div>
+            }
+             </div>
+            <div className="col-8 p-1 container bg-dark">
               <WeekPrediction 
                 day1= {
                   [weatherInfo.list[8].dt_txt,
@@ -74,11 +106,3 @@ const App = ()=> {
 }
 
 export default App;
-   {/*        <SearchData imgHandler={imageHandler} list={weatherInfo.list[0]} city={weatherInfo.city}/>
-         
-<div>    <div>{weatherInfo.city.name}</div>
-          <WeekPrediction imgHandler={imageHandler} day1={weatherInfo.list[16]} day2={weatherInfo.list[16]} day3={weatherInfo.list[24]} day4={weatherInfo.list[32]} />
-        
-<Highlights list={weatherInfo.list[0]}/>
-
-</div>*/}

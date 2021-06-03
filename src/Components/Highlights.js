@@ -1,30 +1,32 @@
+import ProgressBar from 'react-bootstrap/ProgressBar'
 
 const Highlights = (props) => {
+
     return(
       
       <div>
-            <h1 className="text-center">TODAY HIGHLIGHTS</h1>
+            <h1 className="text-center">TODAY'S HIGHLIGHTS</h1>
             <div className=" container">
-              <div className="row align-items-start">
-                <div className="col-5 p-2 m-2 text-center container bg-secondary">
-                  <h4 className="text-center">WIND</h4>
+              <div className="row">
+                <div className="col  p-2 m-2 text-center container bg-secondary rounded">
+                  <h5 className="text-center">WIND</h5>
                   <p>{props.list.wind.speed} mph</p>
+                  {props.list.wind.deg} degree
                 </div>
-                <div className="col-5 p-2 m-2 text-center container bg-secondary">
-                  <h4 className="">HUMIDITY</h4>
-                  <p>{props.list.main.humidity} %</p>
-                  <div class="progress">
-                    <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
+                <div className="col p-2 m-2 text-center container bg-secondary rounded">
+                  <h5 className="text-center">HUMIDITY</h5>
+                  <p id="humidity">{props.list.main.humidity} % </p>
+                  <ProgressBar variant="primary" now={props.list.main.humidity} /> 
                 </div>
               </div>
-              <div className="row align-items-end">
-                <div className="col-5 p-2 m-2 text-center container bg-secondary">
-                  <h4 className="text-center">VISIBILITY</h4>
+
+              <div className="row ">
+                <div className="col p-2 m-2 text-center container bg-secondary rounded">
+                  <h5 className="text-center">VISIBILITY</h5>
                   <p>{props.list.visibility/1000} miles</p>
                 </div>
-                <div className="col-5 p-2 m-2 text-center container bg-secondary">
-                  <h4 className="text-center">AIR PRESSURE</h4>
+                <div className="col p-2 m-2 text-center container bg-secondary rounded" >
+                  <h5 className="text-center">AIR PRESSURE</h5>
                 <p>{props.list.main.pressure} mb</p>
                 </div>
               </div>

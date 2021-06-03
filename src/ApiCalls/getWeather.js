@@ -10,7 +10,14 @@ export const getWeather = async (location) =>{
 
     const data = await fetch(FINAL_URL)
     const dataJson = await data.json()
-    return dataJson
+    return dataJson 
+      
+  
+      
+    
+    
+  
+    
     //setWeatherInfo(dataJson)
     /*
     return fetch(FINAL_URL).then(response => {const {data}=response; return data})

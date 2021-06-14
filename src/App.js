@@ -4,40 +4,54 @@ import {getWeather} from './ApiCalls/getWeather.js'
 import Highlights from './Components/Highlights.js'
 import WeekPrediction from './Components/WeekPrediction.js'
 import Footer from './Components/Footer.js'
-import Spinner from 'react-bootstrap/Spinner'
 
 
 const App = ()=> {
   
   const [weatherInfo, setWeatherInfo] = useState({});
-  const [loading, setLoading] = useState(false);
   const [searchLocation, setSearchLocation] = useState('Madrid')
   const [newSearch, setNewSearch] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [locationHistory, setLocationHistory] = useState([]);
+  const [tempUnity, setTempUnity] = useState('ºF');
   
   useEffect(() => {
     getWeather(searchLocation).then((weatherInfo) =>
      { 
-      setWeatherInfo(weatherInfo);
-      setLoading(false);
       setNewSearch(false)
+      setWeatherInfo(weatherInfo);
       setSearchLocation("")
+      setTempUnity('ºF')
     }
-     
-    );
+    )
   },[newSearch]);
 
   const handleSubmit = (event) =>{
     event.preventDefault()
     if(document.getElementById('inputSearch').value == '' || document.getElementById('inputSearch').value ==' '){
-      alert('Plase insert a location') 
+      if(event.target.id == "formSearch"){
+        alert('Plase insert a location')
+      }else{
+        setSearchLocation(event.target.id)
+        setNewSearch(true)
+        setShowForm(false)
+      } 
     }else{
-    setNewSearch(true)
-    setShowForm(false)  
-    setLocationHistory([...locationHistory, searchLocation])
+      setNewSearch(true)
+      setShowForm(false) 
+      let exist = false 
+      if(typeof locationHistory !== 'undefined' && locationHistory.length > 0){
+          for(let i = 0;i < locationHistory.length ;i++){
+            if(locationHistory[i] === searchLocation){
+              exist=true
+            }
+          }
+      }
+      if(exist===false){
+        setLocationHistory([...locationHistory, searchLocation])
+      }
+      
     }
-    
   }
 
   const handleChange = (event) =>{
@@ -53,30 +67,27 @@ const App = ()=> {
    let roundedTemp =  Math.round(tempValue)
    return roundedTemp
   }
-  const tempUnityHandler = ()=> {
-    let arrayTempFields = document.getElementsByClassName('tempField');
-    let button = document.getElementById('tempUnityBoton');
-    let tempUnity = button.innerText
-    let newDegree = ''
-    let degreeValue = ''
 
+  const tempUnityHandler = ()=> {
+    let degreeValue = 0
+    let newDegree = 0
+    let arrayTempFields = document.getElementsByClassName('tempField');
+    
     for(let n = 0;n<arrayTempFields.length;n++){
-      degreeValue = arrayTempFields[n].innerText.substring(0, arrayTempFields[n].innerText.length - 2);
+      degreeValue = arrayTempFields[n].innerText
       if(tempUnity === 'ºF'){
         newDegree = degreeValue - (273)
-        arrayTempFields[n].innerText = newDegree + 'ºC'
+        arrayTempFields[n].innerText = newDegree
       }else{
         newDegree = degreeValue - (-273)
-        arrayTempFields[n].innerText = newDegree + 'ºF' 
+        arrayTempFields[n].innerText = newDegree
       }
     }
-
     tempUnity === 'ºF' 
-    ?button.innerText = 'ºC'
-    :button.innerText = 'ºF'
- 
+    ?setTempUnity('ºC')
+    :setTempUnity('ºF')
   }
-  
+
   const imgSelector =(weather) =>{
     let weatherValue = weather
     const options = {
@@ -90,9 +101,8 @@ const App = ()=> {
   }
 
   return (
-    
     <div>
-        {loading ? <Spinner animation="grow" /> :''}
+        
         {weatherInfo.city &&(
           <div className="row p-5 text-center justify-content-start bg-secondary text-secondary text-white">
             <div className="col p-1 m-2 bg-dark rounded">
@@ -100,18 +110,18 @@ const App = ()=> {
             {showForm
              ?
              <div>
-              <form className="form-search p-2 " onSubmit={handleSubmit}>
+              <form id="formSearch" className="form-search p-2 " onSubmit={handleSubmit}>
                 <div className="form-group mx-sm-3 mb-2">
                 <input id="inputSearch" className="col input-medium search-query" onChange={handleChange} type="text" value={searchLocation} />
                 </div>
-                <button className="col btn btn-primary mb-2">Search</button>
+                <button className="col btn btn-primary mb-2" >Search</button>
               </form>
               <div>
               <p>History</p>
               {locationHistory.map(location =>
-                <div key={location}>
-                  {location}
-                </div>
+                <form id={location} className="form-search p-2 " onSubmit={handleSubmit} key={location}>
+                  <button className="btn-lg btn-block w-50 text-white bg-secondary p-2 border border-white rounded">{location}</button>
+                </form>
                 )}
               
               </div>
@@ -121,27 +131,28 @@ const App = ()=> {
                 <div className="container">
                   <div className="row m-2 justify-content-between">
                   <button className="col-8 btn btn-primary" onClick={handleClick}>Search for places</button>
-                  <button id="tempUnityBoton" className="col-2 aling-self-end btn btn-primary rounded-circle" onClick={tempUnityHandler}>ºF</button>
+                  <button id="tempUnityBoton" className="col-2 aling-self-end btn btn-primary rounded-circle" onClick={tempUnityHandler}>{tempUnity}</button>
                   </div>
                 </div>
                 <div className="p-3 m-3" >
                   <img className="img-fluid" src={imgSelector(weatherInfo.list[8].weather[0].main)}
                    alt={weatherInfo.list[8].weather[0].main} />
-                  <h1 className="tempField">{roundHandler(weatherInfo.list[0].main.temp)}ºF</h1>
-                  <p className="">{weatherInfo.list[0].dt_txt}</p>
-                  <p className="">{weatherInfo.city.name}({weatherInfo.city.country})</p>
+                  <div><h1 className="tempField">{roundHandler(weatherInfo.list[0].main.temp)}</h1>{tempUnity}</div>
+                  <p>{weatherInfo.list[0].dt_txt}</p>
+                  <p>{weatherInfo.city.name}({weatherInfo.city.country})</p>
                 </div>
               </div>
             }
              </div>
             <div className="col p-1 m-2 container bg-dark rounded">
               <WeekPrediction 
-              imgSelector={imgSelector}
+                tempUnity={tempUnity}
+                imgSelector={imgSelector}
                 day1= {
                   [weatherInfo.list[8].dt_txt,
                   weatherInfo.list[8].weather[0].main,
                   roundHandler(weatherInfo.list[8].main.temp_max),
-                  roundHandler(weatherInfo.list[8].main.temp_min)
+                    roundHandler(weatherInfo.list[8].main.temp_min)
                 ]}
                 
                 day2= {
@@ -155,7 +166,7 @@ const App = ()=> {
                   [weatherInfo.list[24].dt_txt,
                   weatherInfo.list[24].weather[0].main,
                   roundHandler(weatherInfo.list[24].main.temp_max),
-                    roundHandler(weatherInfo.list[24].main.temp_min)
+                  roundHandler(weatherInfo.list[24].main.temp_min)
                 ]}
 
                 day4= {
@@ -167,13 +178,11 @@ const App = ()=> {
                 />
               <Highlights list={weatherInfo.list[0]}/>
             </div>
-            <Footer />
+            
           </div>
         )
         }
-        
-
-        
+        <Footer /> 
     </div>
   );
 }
